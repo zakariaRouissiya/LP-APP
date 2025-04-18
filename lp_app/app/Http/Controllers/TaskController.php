@@ -38,6 +38,7 @@ class TaskController extends Controller
     public function complete(Task $task)
     {
         $task->completed = true;
+        $task->completed_at = now();
         $task->save();
 
         return redirect()->route('tasks.index');
