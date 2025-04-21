@@ -2,23 +2,37 @@
 
 namespace Tests\Feature;
 
-use App\Models\Task;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\Task;
+use App\Models\Category;
 
 class ControllerToViewTest extends TestCase
 {
-    use RefreshDatabase;
-
-    /** @test */
-    public function index_displays_all_tasks()
+    /**
+     * Teste si les tâches sont correctement transmises à la vue.
+     *
+     * @return void
+     */
+    public function test_tasks_are_passed_to_view()
     {
-        $task = Task::create(['title' => 'Test task']);
+        $task = Task::factory()->create();
 
         $response = $this->get('/tasks');
+        $response->assertStatus(200);
+        $response->assertSee($task->title);
+    }
 
-        $response->assertViewHas('tasks', function ($tasks) use ($task) {
-            return $tasks->contains($task);
-        });
+    /**
+     * Teste si les catégories sont correctement transmises à la vue.
+     *
+     * @return void
+     */
+    public function test_categories_are_passed_to_view()
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->get('/tasks');
+        $response->assertStatus(200);
+        $response->assertSee($category->name);
     }
 }

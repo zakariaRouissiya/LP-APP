@@ -7,6 +7,9 @@ use App\Http\Controllers\TaskController;
 Route::get('/', [TaskController::class, 'index'])->name('tasks.index');
 
 
+Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+
+
 Route::resource('tasks', TaskController::class);
 
 

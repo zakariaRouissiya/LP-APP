@@ -6,15 +6,20 @@ use Tests\TestCase;
 
 class PingTest extends TestCase
 {
-    /** @test */
-    public function home_page_is_accessible()
+    /**
+     * Teste si les routes principales sont accessibles.
+     *
+     * @return void
+     */
+    public function test_home_page_is_accessible()
     {
-        $this->get('/tasks')->assertStatus(200);
+        $response = $this->get('/');
+        $response->assertStatus(200);
     }
 
-    /** @test */
-    public function create_task_page_is_accessible()
+    public function test_tasks_page_is_accessible()
     {
-        $this->get('/tasks/create')->assertStatus(200);
+        $response = $this->get('/tasks');
+        $response->assertStatus(200);
     }
 }

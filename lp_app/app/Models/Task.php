@@ -9,8 +9,12 @@ class Task extends Model
 {
     use HasFactory;
 
-    
-    protected $fillable = ['title', 'completed', 'completed_at'];
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    protected $fillable = ['title', 'completed', 'completed_at', 'category_id', 'priority'];
     protected $casts = [
         'completed' => 'boolean',
         'completed_at' => 'datetime',
