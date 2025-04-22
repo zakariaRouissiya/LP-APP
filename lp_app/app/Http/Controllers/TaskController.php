@@ -2,26 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
 use App\Models\Category;
+use App\Models\Task;
+use App\Services\TaskService;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    protected $taskService;
+
+    public function __construct(TaskService $taskService)
+    {
+        $this->taskService = $taskService;
+    }
+
     public function index(Request $request)
     {
         $categories = Category::all();
-
-        
-        $tasks = Task::query()
-            ->when($request->category, function ($query, $category) {
-                $query->where('category_id', $category);
-            })
-            ->when($request->title, function ($query, $title) {
-                $query->where('title', 'like', '%' . $title . '%');
-            })
-            ->orderBy('priority', 'desc')
-            ->paginate(5);
+        $tasks = $this->taskService->getTasks($request->all());
 
         return view('tasks.index', compact('tasks', 'categories'));
     }
@@ -46,17 +44,14 @@ class TaskController extends Controller
 
     public function complete(Task $task)
     {
-        $task->update([
-            'completed' => true,
-            'completed_at' => now(),
-        ]);
+        $this->taskService->completeTask($task);
 
         return redirect()->route('tasks.index')->with('success', 'Tâche marquée comme terminée.');
     }
 
     public function destroy(Task $task)
     {
-        $task->delete();
+        $this->taskService->deleteTask($task);
 
         return redirect()->route('tasks.index')->with('success', 'Tâche supprimée avec succès.');
     }
