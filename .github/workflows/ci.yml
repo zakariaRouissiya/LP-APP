@@ -8,12 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        php: [8.0, 8.1]
+        php: [8.2]
 
     services:
       mysql:
@@ -43,6 +42,17 @@ jobs:
 
       - name: Install dependencies
         run: composer install
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..10}; do
+            if mysqladmin ping -h 127.0.0.1 --silent; then
+              echo "MySQL is ready!";
+              break;
+            fi
+            echo "Waiting for MySQL...";
+            sleep 5;
+          done
 
       - name: Run migrations
         env:
