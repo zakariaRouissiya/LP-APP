@@ -44,27 +44,19 @@ jobs:
         working-directory: lp_app
         run: composer install
 
-      - name: Wait for MySQL
-        run: |
-          for i in {1..10}; do
-            if mysqladmin ping -h 127.0.0.1 --silent; then
-              echo "MySQL is ready!";
-              break;
-            fi
-            echo "Waiting for MySQL...";
-            sleep 5;
-          done
-
-      - name: Run migrations
+      - name: Set up application key
         working-directory: lp_app
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: test_db
-          DB_USERNAME: root
-          DB_PASSWORD: root
-        run: php artisan migrate --force
+        run: php artisan key:generate
+
+      - name: Create SQLite database
+        working-directory: lp_app
+        run: |
+          touch database/database.sqlite
+          php artisan migrate --seed --force
+
+      - name: Install Chromedriver for Dusk
+        working-directory: lp_app
+        run: php artisan dusk:chrome-driver
 
       - name: Run tests
         working-directory: lp_app
