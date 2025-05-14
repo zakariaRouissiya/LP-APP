@@ -1,30 +1,41 @@
-FROM php:8.1-fpm
 
-# Install system dependencies
+FROM php:8.2-fpm
+
+
 RUN apt-get update && apt-get install -y \
     libpng-dev \
-    libjpeg-dev \
+    libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev \
+    libzip-dev \
     zip \
-    unzip \
     git \
-    curl
+    curl \
+    nodejs \
+    npm \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql zip
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Set working directory
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+
 WORKDIR /var/www
 
-# Copy project files
+
+COPY package*.json ./
+
+
+RUN npm install
+
+
 COPY . .
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader
 
-# Expose port 9000 and start PHP-FPM server
+RUN composer install --no-interaction --prefer-dist
+
+
 EXPOSE 9000
-CMD ["php-fpm"]
+EXPOSE 3000
+
+
+CMD ["sh", "-c", "php-fpm & npm run dev"]

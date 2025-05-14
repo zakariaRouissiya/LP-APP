@@ -22,7 +22,7 @@
                 </button>
             </div>
 
-            <!-- Formulaire de filtre -->
+            
             <form method="GET" action="{{ route('tasks.index') }}" class="mb-4">
                 <div class="d-flex align-items-center">
                     <select name="category" class="form-select me-2">
@@ -44,7 +44,7 @@
                 </div>
             </form>
 
-            <!-- Table des tâches -->
+            
             <div class="table-responsive">
                 <table class="table table-striped table-bordered table-hover align-middle">
                     <thead class="table-light">
@@ -88,22 +88,27 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    @if (!$task->completed)
-                                        <form action="{{ route('tasks.complete', $task) }}" method="POST" class="d-inline">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        @if (!$task->completed)
+                                            <form action="{{ route('tasks.complete', $task) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-outline-success btn-sm">
+                                                    <i class="bi bi-check-circle"></i> Terminer
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#taskDetailsModal{{ $task->id }}">
+                                            <i class="bi bi-eye"></i> Détails
+                                        </button>
+                                        <form action="{{ route('tasks.destroy', $task) }}" method="POST" class="d-inline delete-form">
                                             @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-outline-success btn-sm">
-                                                <i class="bi bi-check-circle"></i> Terminer
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Supprimer
                                             </button>
                                         </form>
-                                    @endif
-                                    <form action="{{ route('tasks.destroy', $task) }}" method="POST" class="d-inline delete-form">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            <i class="bi bi-trash"></i> Supprimer
-                                        </button>
-                                    </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -111,7 +116,7 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            
             <div class="d-flex justify-content-center mt-4">
                 {{ $tasks->links('pagination::bootstrap-5') }}
             </div>
@@ -119,7 +124,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+
 <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-sm">
@@ -131,12 +136,12 @@
                 <form action="{{ route('tasks.store') }}" method="POST">
                     @csrf
                     <div class="row mb-3">
-                        <!-- Titre -->
+                        
                         <div class="col-md-6">
                             <label for="title" class="form-label">Titre de la tâche</label>
                             <input type="text" name="title" id="title" class="form-control border-dark" required>
                         </div>
-                        <!-- Catégorie -->
+                        
                         <div class="col-md-6">
                             <label for="category_id" class="form-label">Catégorie</label>
                             <select name="category_id" id="category_id" class="form-select border-dark">
@@ -148,7 +153,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <!-- Priorité -->
+                        
                         <div class="col-md-6">
                             <label for="priority" class="form-label">Priorité</label>
                             <select name="priority" id="priority" class="form-select border-dark">
@@ -157,7 +162,7 @@
                                 <option value="élevée">Élevée</option>
                             </select>
                         </div>
-                        <!-- Bouton Ajouter -->
+                        
                         <div class="col-md-6 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary w-100 rounded-pill">Ajouter</button>
                         </div>
@@ -167,6 +172,40 @@
         </div>
     </div>
 </div>
+
+@foreach ($tasks as $task)
+<div class="modal fade" id="taskDetailsModal{{ $task->id }}" tabindex="-1" aria-labelledby="taskDetailsModalLabel{{ $task->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-sm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskDetailsModalLabel{{ $task->id }}">Détails de la Tâche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Titre :</strong> {{ $task->title }}</p>
+                <p><strong>Catégorie :</strong> {{ $task->category->name ?? 'Non catégorisé' }}</p>
+                <p><strong>Priorité :</strong> {{ ucfirst($task->priority) }}</p>
+                <p><strong>Statut :</strong> {{ $task->completed ? 'Terminée' : 'En cours' }}</p>
+                <p><strong>Date de création :</strong> {{ $task->created_at->format('d/m/Y H:i') }}</p>
+                <p><strong>Date de terminaison :</strong> 
+                    @if ($task->completed_at)
+                        {{ $task->completed_at->format('d/m/Y H:i') }}
+                    @else
+                        -------------------
+                    @endif
+                </p>
+                <p><strong>Période consommée :</strong> 
+                    @if ($task->completed_at)
+                        {{ $task->created_at->diffForHumans($task->completed_at, true) }}
+                    @else
+                        -------------------
+                    @endif
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

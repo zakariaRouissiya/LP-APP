@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    image: laravel-app:latest
+    ports:
+      - "8000:9000"  
+      - "3000:3000"  
+    volumes:
+      - .:/var/www
+    networks:
+      - laravel-network
+    depends_on:
+      - db
+      - chrome
+
+  db:
+    image: mysql:5.7
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: todo_app
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - laravel-network
+
+  chrome:
+    image: selenium/standalone-chrome
+    container_name: chrome
+    ports:
+      - "4444:4444"
+    networks:
+      - laravel-network
+
+networks:
+  laravel-network:
+    driver: bridge
+
+volumes:
+  db_data:

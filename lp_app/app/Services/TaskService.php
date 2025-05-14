@@ -23,7 +23,7 @@ class TaskService implements TaskServiceInterface
                 }
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
     }
 
     public function completeTask(Task $task)
