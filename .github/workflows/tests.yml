@@ -14,7 +14,7 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: "yes" 
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"   
           MYSQL_DATABASE: todo_app
         ports:
           - 3306:3306
@@ -25,33 +25,36 @@ jobs:
           --health-retries 3
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: 8.2
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, xml, mysql
 
-    - name: Install dependencies
-      working-directory: ./lp_app
-      run: composer install --no-interaction --prefer-dist
+      - name: Install dependencies
+        working-directory: ./lp_app
+        run: composer install --no-interaction --prefer-dist
 
-    - name: Set up .env
-      working-directory: ./lp_app
-      run: cp .env.example .env
-
-    - name: Generate application key
-      working-directory: ./lp_app
-      run: php artisan key:generate --ansi
-
-    - name: Run migrations
-      working-directory: ./lp_app
-      run: php artisan migrate --database=mysql
       
-    - name: Install ChromeDriver
-      run: php ./lp_app/artisan dusk:chrome-driver
+      - name: Set up .env for testing
+        working-directory: ./lp_app
+        run: cp .env.testing .env
 
-    - name: Run tests
-      working-directory: ./lp_app
-      run: php artisan test --env=testing
+      - name: Generate application key
+        working-directory: ./lp_app
+        run: php artisan key:generate --ansi
+
+      - name: Run migrations
+        working-directory: ./lp_app
+        run: php artisan migrate --env=testing
+
+      - name: Install ChromeDriver
+        working-directory: ./lp_app
+        run: php artisan dusk:chrome-driver
+
+      - name: Run tests
+        working-directory: ./lp_app
+        run: php artisan test --env=testing

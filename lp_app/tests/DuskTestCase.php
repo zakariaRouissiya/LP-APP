@@ -18,7 +18,8 @@ abstract class DuskTestCase extends BaseTestCase
     public static function prepare(): void
     {
         if (! static::runningInSail()) {
-            static::startChromeDriver(['--port=9515']);
+            static::startChromeDriver(['--port=9515',
+            '--user-data-dir=/tmp/chrome-user-data']);
         }
     }
 
@@ -26,12 +27,23 @@ abstract class DuskTestCase extends BaseTestCase
      * Create the RemoteWebDriver instance.
      */
     protected function driver(): RemoteWebDriver
-    {
-        return RemoteWebDriver::create(
-            'http://localhost:9515',
-            DesiredCapabilities::chrome()
-        );
-    }
+{
+    $options = (new ChromeOptions)->addArguments([
+        '--disable-gpu',
+        '--headless',
+        '--window-size=1920,1080',
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
+        '--user-data-dir=/tmp/chrome-user-data'
+    ]);
+
+    return RemoteWebDriver::create(
+        'http://localhost:9515',
+        DesiredCapabilities::chrome()->setCapability(
+            ChromeOptions::CAPABILITY, $options
+        )
+    );
+}
 
     /**
      * Get the base URL for the application.
