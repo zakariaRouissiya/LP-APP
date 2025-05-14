@@ -41,9 +41,16 @@ jobs:
       working-directory: ./lp_app
       run: cp .env.example .env
 
+    - name: Generate application key
+      working-directory: ./lp_app
+      run: php artisan key:generate --ansi
+
     - name: Run migrations
       working-directory: ./lp_app
       run: php artisan migrate --database=mysql
+      
+    - name: Install ChromeDriver
+      run: php ./lp_app/artisan dusk:chrome-driver
 
     - name: Run tests
       working-directory: ./lp_app
