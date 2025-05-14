@@ -34,13 +34,17 @@ jobs:
         php-version: 8.2
 
     - name: Install dependencies
+      working-directory: ./lp_app
       run: composer install --no-interaction --prefer-dist
 
     - name: Set up .env
+      working-directory: ./lp_app
       run: cp .env.example .env
 
     - name: Run migrations
+      working-directory: ./lp_app
       run: php artisan migrate --database=mysql
 
     - name: Run tests
+      working-directory: ./lp_app
       run: php artisan test --env=testing
