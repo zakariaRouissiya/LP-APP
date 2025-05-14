@@ -41,7 +41,7 @@ jobs:
       
       - name: Set up .env for testing
         working-directory: ./lp_app
-        run: cp .env.testing .env
+        run: cp .env.example .env
 
       - name: Generate application key
         working-directory: ./lp_app
