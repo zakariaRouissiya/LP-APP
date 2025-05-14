@@ -37,7 +37,7 @@ jobs:
       working-directory: ./lp_app
       run: composer install --no-interaction --prefer-dist
 
-    - name: Set up .env
+    - name: Set  .env
       working-directory: ./lp_app
       run: cp .env.example .env
 
