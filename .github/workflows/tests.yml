@@ -52,4 +52,4 @@ jobs:
 
       - name: Run PHPUnit tests
         working-directory: ./lp_app
-        run: ./vendor/bin/phpunit --colors=always --no-interaction
+        run: ./vendor/bin/phpunit --colors=always 
