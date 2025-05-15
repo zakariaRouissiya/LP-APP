@@ -14,7 +14,7 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"   
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
           MYSQL_DATABASE: todo_app
         ports:
           - 3306:3306
@@ -38,7 +38,6 @@ jobs:
         working-directory: ./lp_app
         run: composer install --no-interaction --prefer-dist
 
-      
       - name: Set up .env for testing
         working-directory: ./lp_app
         run: cp .env.example .env
@@ -47,14 +46,10 @@ jobs:
         working-directory: ./lp_app
         run: php artisan key:generate --ansi
 
-      - name: Run migrations
+      - name: Run migrations and seed database
         working-directory: ./lp_app
-        run: php artisan migrate --env=testing
+        run: php artisan migrate --seed --force
 
-      - name: Install ChromeDriver
+      - name: Run PHPUnit tests
         working-directory: ./lp_app
-        run: php artisan dusk:chrome-driver
-
-      - name: Run tests
-        working-directory: ./lp_app
-        run: php artisan test --env=testing
+        run: ./vendor/bin/phpunit --colors=always --no-interaction
