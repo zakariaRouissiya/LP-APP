@@ -1,0 +1,82 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: todo_app
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, xml, mysql
+
+      - name: Install dependencies
+        working-directory: ./lp_app
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Set up .env for testing
+        working-directory: ./lp_app
+        run: cp .env.example .env
+
+      - name: Generate application key
+        working-directory: ./lp_app
+        run: php artisan key:generate --ansi
+
+      - name: Run migrations and seed database
+        working-directory: ./lp_app
+        run: php artisan migrate --seed --force
+
+      - name: Run PHPUnit tests
+        working-directory: ./lp_app
+        run: ./vendor/bin/phpunit --colors=always
+
+  build-linux:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Archive Linux artifact
+        run: zip -r lp_app-linux.zip lp_app
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lp_app-linux
+          path: lp_app-linux.zip
+
+  build-windows:
+    needs: laravel-tests
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Archive Windows artifact
+        run: Compress-Archive -Path lp_app -DestinationPath lp_app-windows.zip
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lp_app-windows
+          path: lp_app-windows.zip
